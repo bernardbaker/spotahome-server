@@ -14,6 +14,10 @@ export const typeDefs = gql`
     homecardHidpi: Url!
   }
 
+  type HomeCardId {
+    id: String!
+  }
+
   type HomeCard {
     adId: Int!
     currencySymbol: String!
@@ -23,6 +27,7 @@ export const typeDefs = gql`
   }
 
   type Query {
+    homeCardIds(first: Int): [HomeCardId]
     homeCard(id: Int!): HomeCard
     homeCards(first: Int): [HomeCard]
   }
@@ -31,6 +36,8 @@ export const typeDefs = gql`
 // Provide resolver functions for your schema fields
 export const resolvers = {
   Query: {
+    homeCardIds: (root, { first }, { dataSources }) =>
+      dataSources.homeCardsAPI.getHomeCardIds(first),
     homeCard: (root, { id }, { dataSources }) =>
       dataSources.homeCardsAPI.getAHomeCard(id),
     homeCards: (root, { first }, { dataSources }) =>

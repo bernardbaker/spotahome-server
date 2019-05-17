@@ -1,8 +1,8 @@
 import { ApolloServer, gql } from "apollo-server-express";
 import { createTestClient } from "apollo-server-testing";
 import request from "supertest";
-import { HomeCardsAPI } from "./src/datasource";
 import app from "./src/app";
+import { HomeCardsAPI } from "./src/datasource";
 import { appServerReference, resolvers, typeDefs } from "./src/server";
 
 describe("Test the root path and graphql endpoints", () => {
@@ -58,6 +58,32 @@ describe("Test the root path and graphql endpoints", () => {
       });
   });
 
+  it("fetches a set number of card ids", async () => {
+    // override the default timeout
+    jest.setTimeout(1200000);
+    //   create the API
+    const homeCardsAPI = new HomeCardsAPI();
+    // create a test server to test against, using our production typeDefs,
+    // resolvers, and dataSources.
+    const server = new ApolloServer({
+      typeDefs,
+      resolvers,
+      dataSources: () => ({ homeCardsAPI })
+    });
+
+    // mock the dataSource's underlying fetch methods
+    homeCardsAPI.homeCardIds = jest.fn(() => {});
+
+    // use the test server to create a query function
+    const { query } = createTestClient(server);
+
+    // run query against the server and snapshot the output
+    const res = await query({
+      query: GET_HOME_CARD_IDS
+    });
+    expect(res.data.homeCardIds.length).toBe(30);
+  });
+
   it("fetches a single card", async () => {
     //   create the API
     const homeCardsAPI = new HomeCardsAPI();
@@ -109,6 +135,14 @@ describe("Test the root path and graphql endpoints", () => {
     expect(res.data.homeCards.length).toBe(30);
   });
 });
+
+const GET_HOME_CARD_IDS = gql`
+  {
+    homeCardIds(first: 30) {
+      id
+    }
+  }
+`;
 
 const GET_A_HOME_CARD = gql`
   {

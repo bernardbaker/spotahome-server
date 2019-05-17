@@ -13,6 +13,23 @@ class HomeCardsAPI extends _apolloDatasourceRest.RESTDataSource {
     this.baseURL = "https://frontend-interview.spotahome.com/api/public/listings/search";
   }
 
+  async getHomeCardIds(limit = 30) {
+    let args = {
+      per_page: limit,
+      page: 1
+    };
+    const response = await this.get("markers/madrid", args); // handle error
+
+    if (!response.ok) {
+      throw new Error("Error when getting markers");
+    } // per_page not working - so cap the results
+
+
+    if (response.data.length > 30) response.data.length = 30; // return the response
+
+    return response.data;
+  }
+
   async getHomeCards(limit = 30) {
     let args = {
       per_page: limit,

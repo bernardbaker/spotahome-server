@@ -27,6 +27,10 @@ const typeDefs = _apolloServerExpress.gql`
     homecardHidpi: Url!
   }
 
+  type HomeCardId {
+    id: String!
+  }
+
   type HomeCard {
     adId: Int!
     currencySymbol: String!
@@ -36,6 +40,7 @@ const typeDefs = _apolloServerExpress.gql`
   }
 
   type Query {
+    homeCardIds(first: Int): [HomeCardId]
     homeCard(id: Int!): HomeCard
     homeCards(first: Int): [HomeCard]
   }
@@ -44,6 +49,11 @@ const typeDefs = _apolloServerExpress.gql`
 exports.typeDefs = typeDefs;
 const resolvers = {
   Query: {
+    homeCardIds: (root, {
+      first
+    }, {
+      dataSources
+    }) => dataSources.homeCardsAPI.getHomeCardIds(first),
     homeCard: (root, {
       id
     }, {
